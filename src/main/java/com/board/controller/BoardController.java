@@ -1,19 +1,24 @@
 package com.board.controller;
 
 import com.board.dto.BoardDto;
+import com.board.entity.Board;
 import com.board.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+import java.util.Optional;
+
+@RestController
 @RequiredArgsConstructor
+@Slf4j
 public class BoardController {
 
     private final BoardService boardService;
@@ -24,7 +29,10 @@ public class BoardController {
      */
     @GetMapping("/board")
     public String getBoard() {
-        return "OK";
+        log.info("getMapping test");
+        List<Board> findAll = boardService.getFindAll();
+        log.info(findAll.toString());
+        return "ok";
 
     }
 
@@ -32,13 +40,14 @@ public class BoardController {
      * 게시물 1건 조회
      */
     @GetMapping("/board/{id}")
-    public String findByBoardId(@PathVariable Long id) {
+    public String findByBoardId(@PathVariable(name = "id") Long id) {
 
         if (id.equals("") || id == null) {
             return "게시물 번호가 존재하지 않습니다.";
         }
 
-        boardService.getBoardById(id);
+        Optional<Board> boardById = boardService.getBoardById(id);
+        log.info(boardById.toString());
         return "게시물 1건 조회 성공";
     }
 
@@ -46,7 +55,7 @@ public class BoardController {
      * 게시물 1건 조회
      */
     @PostMapping("/board/{id}")
-    public String postFindByBoardId(@PathVariable Long id) {
+    public String postFindByBoardId(@PathVariable(name = "id") Long id) {
 
         if (id.equals("") || id == null) {
             return "게시물 번호가 존재하지 않습니다.(post)";
@@ -60,23 +69,50 @@ public class BoardController {
      * 게시물 저장
      */
     @PostMapping("/board")
-    public String postBoard(@Valid BoardDto boardDto, BindingResult bindingResult) {
+    public ResponseEntity<?> postBoard(@RequestBody @Valid BoardDto boardDto, BindingResult bindingResult) {
+
+        log.info("postMapping test");
+        log.info(String.valueOf(boardDto));
 
         if (bindingResult.hasErrors()) {
-            return "유효성 검증에 통과하지 못했습니다.";
+            return new ResponseEntity<>("fail1", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        boardService.saveBoard(boardDto);
-        return "글작성 완료입니다. db에서 한번더 확인해 보세요";
+        if (boardService.saveBoard(boardDto)) {
+            return new ResponseEntity<>("success", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("fail2", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * 게시물 수정
      */
+    @PutMapping("/board/update/{id}")
+    public ResponseEntity<?> updateBoard(@PathVariable(name = "id") Long id,
+                                         @RequestBody @Valid BoardDto boardDto, BindingResult bindingResult) {
 
-//    @PutMapping("/board/update")
+        if (boardDto.getBoard_no() == null) {
+            return new ResponseEntity<>("null board no errors", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>("fail1", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
+        if (boardService.saveBoard(boardDto)) {
+            return new ResponseEntity<>("success", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("fail2", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/board/delete/{id}")
+    public String deleteBoard(@PathVariable(name = "id") Long id) {
+
+        boardService.delete(id);
+        return "delete ok";
+    }
 
 
 }

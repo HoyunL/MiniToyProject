@@ -28,9 +28,9 @@ public class BoardService {
 
     }
 
-    public Long saveBoard(BoardDto boardDto) {
+    public boolean saveBoard(BoardDto boardDto) {
         Board entity = boardRepository.save(boardDto.toBoardEntity());
-        return entity.getBoard_no();
+        return true;
     }
 
     public void delete(Long id) {

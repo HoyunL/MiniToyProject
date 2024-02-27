@@ -2,10 +2,7 @@ package com.board.dto;
 
 import com.board.entity.Board;
 import com.common.BaseTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class BoardDto extends BaseTime {
 
     private Long board_no;
@@ -22,7 +20,6 @@ public class BoardDto extends BaseTime {
     private String title;
 
     private String content;
-
 
     public Board toBoardEntity() {
         return Board.builder()
