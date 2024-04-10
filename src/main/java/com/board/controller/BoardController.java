@@ -41,7 +41,7 @@ public class BoardController {
      */
     @GetMapping("/board/{id}")
     public String findByBoardId(@PathVariable(name = "id") Long id) {
-
+        //----------------------
         if (id.equals("") || id == null) {
             return "게시물 번호가 존재하지 않습니다.";
         }
